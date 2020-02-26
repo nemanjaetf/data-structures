@@ -48,6 +48,10 @@ public:
     bool isEqual(T el) {
         return el == info;
     };
+
+    T print() {
+        return info;
+    };
 };
 
 template <class T>
@@ -64,6 +68,12 @@ public:
     ~SLList() {
 
     };
+
+    void printAll() {
+        for (SLLNode<T>* tmp = head; tmp != nullptr; tmp = tmp->next) {
+            std::cout << tmp->print() << std::endl;
+        }
+    }
 
     // Interesting (best) approach for checking if the list is empty.
     // If head is NULL, then return false, otherwise return true.
@@ -124,7 +134,7 @@ public:
         SLLNode<T>* tmp;
 
         for(tmp = head; tmp != nullptr; tmp = tmp->next) {
-            if (tmp->info == el) {
+            if (tmp->isEqual(el)) {
                 return true;
             }
         }
@@ -134,12 +144,63 @@ public:
 
     SLLNode<T>* findNodePtr(T el) {
         SLLNode<T>* tmp;
-        for (tmp = head; tmp != nullptr && !(tmp->isEqual(el)); tmp = tmp->next) {
+        for (tmp = head; tmp != nullptr; tmp = tmp->next) {
             // Element found, return it.
-            return tmp;
+            if (tmp->isEqual(el)) {
+                return tmp;
+            }
         }
 
         return nullptr;
+    };
+
+    SLLNode<T>* getNext(SLLNode<T>* ptr) {
+        if(ptr) {
+            return ptr->next;
+        } else {
+            return nullptr;
+        }
+    };
+
+    T getHeadEl() {
+        if (head) {
+            return head->info;
+        } else {
+            throw "The list is empty!";
+        }
+    };
+
+    T getNextEl(T el) {
+        // First we need to find this Node in our List.
+        SLLNode<T>* pom = findNodePtr(el);
+
+        if (pom->next == nullptr) {
+            throw "This element doesn't have next element!";
+        } else {
+            return (pom->next)->info;
+        }
+    };
+
+    void deleteEl(T el) {
+        if (!isListEmpty()) {
+            // Case 1: We have only one element in our list.
+            if ((head == tail) && head->isEqual(el)) {
+                head = tail = nullptr;
+            } else if (head->info == el) {
+                // Remove from head
+                deleteFromHead();
+            } else if (tail->info == el) {
+                deleteFromTail();
+            } else {
+                SLLNode<T> *pred, *tmp;
+                for(pred = head, tmp = head->next; tmp != nullptr; pred = pred->next, tmp = tmp->next) {
+                    if (tmp->isEqual(el)) {
+                        pred->next = tmp->next;
+                    }
+                }
+
+            }
+        }
     };
 };
 
@@ -148,16 +209,23 @@ int main() {
     SLLNode<int> firstTestingNode(1, &secondTestingNode);
 
     SLList<int> firstTestingList;
+    SLList<int> emptyList;
     firstTestingList.addToHead(2);
     firstTestingList.addToHead(1);
     firstTestingList.addToTail(3);
 //    firstTestingList.deleteFromHead();
 //    firstTestingList.deleteFromTail();
     firstTestingList.isInList(2);
-    firstTestingList.findNodePtr(2);
+    SLLNode<int>* findNode = firstTestingList.findNodePtr(2);
+    firstTestingList.getHeadEl();
+    firstTestingList.getNextEl(2);
+
+    firstTestingList.deleteEl(2);
+    firstTestingList.printAll();
 
     std::cout << "First Testing Node (info value): " << firstTestingNode.getNodeInfo() << std::endl;
     std::cout << "getNextNode() method on firstTestingNode (info value): " << firstTestingNode.getNextNode()->getNodeInfo() << std::endl;
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "findNodePtr(2) method returned: " << findNode->info << std::endl;
+    std::cout << "firstTestingList.getNext(findNode)->info : It should return 3 since findNode is equal to 2. Result: " << firstTestingList.getNext(findNode)->info << std::endl;
     return 0;
 }
